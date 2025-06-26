@@ -11,11 +11,13 @@ namespace VehicleServiceBook.Services
     {
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
+        private readonly IServiceCenterRepository _serviceCenterRepository;
 
-        public UserService(IUserRepository userRepository,IMapper mapper)
+        public UserService(IUserRepository userRepository,IMapper mapper, IServiceCenterRepository serviceCenterRepository)
         {
             _userRepository = userRepository;
             _mapper = mapper;
+            _serviceCenterRepository = serviceCenterRepository;
         }
         public async Task<Registration> AuthenticateAsync(string email, string password)
         {
@@ -31,12 +33,34 @@ namespace VehicleServiceBook.Services
         public async Task<UserDto> RegisterUserAsync(RegisterUserDto dto)
         {
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.PasswordHash);
-            var registration = _mapper.Map<Registration>(dto);
+            var registration = new Registration
+            {
+                Name = dto.Name,
+                Email = dto.Email,
+                Phone = dto.Phone,
+                Address = dto.Address,
+                PasswordHash = hashedPassword,
+                Role = dto.Role
+            };
 
-            await _userRepository.AddUserAsync(registration);
+            await _userRepository.UpdateAsync(user);
             await _userRepository.SaveChangeAsync();
 
-            return _mapper.Map<UserDto>(registration);
+            if (user.Role == "ServiceCenter")
+            {
+                var serviceCenter = await _serviceCenterRepository.GetByUserIdAsync(user.UserId);
+                if (serviceCenter == null)
+                    return false;
+
+                serviceCenter.ServiceCenterName = dto.ServiceCenterName;
+                serviceCenter.ServiceCenterLocation = dto.ServiceCenterLocation;
+                serviceCenter.ServiceCenterContact = dto.ServiceCenterContact;
+
+                await _serviceCenterRepository.AddAsync(serviceCenter); // If you have UpdateAsync, use that instead!
+                await _serviceCenterRepository.SaveChangesAsync();
+            }
+
+            return true;
         }
     }
 }

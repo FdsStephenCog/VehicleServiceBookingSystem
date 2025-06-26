@@ -9,8 +9,12 @@ namespace VehicleServiceBook.Models.DTOS
         [Required]
         public string? Name { get; set; }
 
-        [Required,EmailAddress]
+        [Required]
+        [EmailAddress]
+        [RegularExpression(@"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
+            ErrorMessage = "Please enter a valid email address.")]
         public string? Email { get; set; }
+
 
         [Required,RegularExpression(@"^\d{10}$",ErrorMessage ="Phone must be exactly 10 digits")]
         public string? Phone { get; set; }

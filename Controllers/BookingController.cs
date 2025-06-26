@@ -4,10 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
-using VehicleServiceBook.Models.Domains;
 using VehicleServiceBook.Models.DTOS;
-using VehicleServiceBook.Repositories;
 using VehicleServiceBook.Services;
 
 namespace VehicleServiceBook.Controllers
@@ -66,4 +63,5 @@ namespace VehicleServiceBook.Controllers
         public async Task<IActionResult> GetServiceTypes() =>
             Ok(await _service.GetServiceTypesAsync());
     }
+
 }

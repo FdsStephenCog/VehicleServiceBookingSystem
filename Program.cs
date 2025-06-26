@@ -15,26 +15,11 @@ using VehicleServiceBook.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add CORS services and define a policy here
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAngularFrontend",
-        builder =>
-        {
-            // IMPORTANT: Replace with the actual URL(s) of your Angular development server
-            // Typical Angular development server runs on http://localhost:4200
-            builder.WithOrigins("http://localhost:4200", "https://localhost:4200")
-                   .AllowAnyHeader() // Allows all headers from the client
-                   .AllowAnyMethod(); // Allows all HTTP methods (GET, POST, PUT, DELETE, etc.)
-                                      // .AllowCredentials(); // Uncomment this line if your Angular app sends cookies or authorization headers (like JWT tokens in a later phase)
-        });
-});
-
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Vehicle API", Version = "v1" });
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "ServiVehicle API's", Version = "v1" });
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
@@ -96,11 +81,24 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 builder.Services.AddAuthorization();
 
+//Add Cors
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngularApp",
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:4200") // Angular's dev URL
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+});
+
 
 var app = builder.Build();
 
 app.UseMiddleware<ExceptionMiddleware>();
 
+// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
@@ -110,9 +108,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseRouting();
 
-// Use the CORS policy here, AFTER UseRouting and UseHttpsRedirection (if present),
-// and BEFORE UseAuthentication/UseAuthorization.
-app.UseCors("AllowAngularFrontend"); // Apply the CORS policy
+app.UseHttpsRedirection();
+app.UseCors("AllowAngularApp");
 
 app.UseAuthentication();
 app.UseAuthorization();

@@ -30,9 +30,13 @@ public partial class VehicleServiceBookContext : DbContext
     public virtual DbSet<Vehicle> Vehicles { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=LTIN617242\\SQLEXPRESS;Database=VehicleServiceBook;Integrated Security=True;TrustServerCertificate=True");
-
+    {
+        if (!optionsBuilder.IsConfigured)
+        {
+            // Only configure SQL Server if no provider was set (e.g., in production)
+            optionsBuilder.UseSqlServer("Server=LTIN617505\\SQLEXPRESS;Database=VehicleServiceBook;Trusted_Connection=True;TrustServerCertificate=True");
+        }
+    }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Registration>(entity =>
@@ -255,7 +259,6 @@ public partial class VehicleServiceBookContext : DbContext
                 .HasConstraintName("FK_Invoice_ServiceType");
 
         });
-
 
 
         OnModelCreatingPartial(modelBuilder);
